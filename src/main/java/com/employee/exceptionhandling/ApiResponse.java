@@ -1,8 +1,6 @@
 package com.employee.exceptionhandling;
 
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
 
 @Data
 public class ApiResponse<T> {

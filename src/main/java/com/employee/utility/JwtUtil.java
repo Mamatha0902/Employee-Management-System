@@ -12,9 +12,8 @@ import java.util.Date;
 @Component
 public class JwtUtil {
 
-    // Secure 256-bit secret keys generated once per app startup
-    private static final SecretKey SECRET_KEY = Keys.secretKeyFor(SignatureAlgorithm.HS256);         // Access token key
-    private static final SecretKey REFRESH_SECRET_KEY = Keys.secretKeyFor(SignatureAlgorithm.HS256); // Refresh token key
+    private static final SecretKey SECRET_KEY = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+    private static final SecretKey REFRESH_SECRET_KEY = Keys.secretKeyFor(SignatureAlgorithm.HS256);
 
     public String extractUsername(String token) {
         return extractAllClaims(token, SECRET_KEY).getSubject();
