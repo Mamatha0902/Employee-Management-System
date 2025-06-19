@@ -6,6 +6,7 @@ import com.employee.service.EmployeeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,20 +20,21 @@ public class EmployeeController {
     private EmployeeService employeeService;
 
     @PostMapping("/register")
-    //@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Employee>> registerEmployee(@RequestBody Employee employee) {
         Employee createdEmployee = employeeService.registerEmployee(employee);
         return ResponseEntity.ok(ApiResponse.success(createdEmployee));
     }
 
     @GetMapping("/getAll")
-    // @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER', 'USER')")
+     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<List<Employee>>> getAll() {
         ApiResponse<List<Employee>> response = employeeService.getAll();
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/get/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<ApiResponse<Employee>> getById(@PathVariable Long id) {
         Optional<Employee> employee = employeeService.getById(id);
 
@@ -46,7 +48,7 @@ public class EmployeeController {
     }
 
     @PutMapping("/update/{id}")
-//  @PreAuthorize("hasRole('ADMIN')")
+  @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Employee>> updateEmployee(
             @PathVariable Long id,
             @RequestBody Employee updatedEmployee) {
@@ -68,7 +70,7 @@ public class EmployeeController {
     }
 
         @DeleteMapping("/delete/{id}")
-//    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
         public ResponseEntity<ApiResponse<String>> deleteEmployee (@PathVariable Long id){
             Optional<Employee> employee = employeeService.getById(id);
 
