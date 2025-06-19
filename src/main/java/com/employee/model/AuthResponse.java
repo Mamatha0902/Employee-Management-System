@@ -6,13 +6,15 @@ import lombok.NoArgsConstructor;
 public class AuthResponse {
     private String accessToken;
     private String refreshToken;
+    private String role;
 
     public String getAccessToken() {
         return accessToken;
     }
-    public AuthResponse(String accessToken, String refreshToken) {
+    public AuthResponse(String accessToken, String refreshToken, String role) {
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;
+        this.role = role;
     }
 
     public AuthResponse() {}
@@ -28,4 +30,6 @@ public class AuthResponse {
     public void setRefreshToken(String refreshToken) {
         this.refreshToken = refreshToken;
     }
+    public String getRole() { return role; }
+    public void setRole(String role) { this.role = role; }
 }

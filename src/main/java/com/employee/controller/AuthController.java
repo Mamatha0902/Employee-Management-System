@@ -2,9 +2,13 @@ package com.employee.controller;
 
 import com.employee.model.AuthRequest;
 import com.employee.model.AuthResponse;
+import com.employee.model.PocRole;
+import com.employee.model.PocUser;
+import com.employee.repository.UserRepository;
 import com.employee.service.PocUserService;
 import com.employee.utility.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -26,6 +30,8 @@ public class AuthController {
     private PocUserService userService;
     @Autowired
     private JwtUtil jwtUtil;
+    @Autowired
+    private UserRepository userRepository;
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody AuthRequest request) {
@@ -36,17 +42,30 @@ public class AuthController {
         final String jwt = jwtUtil.generateToken(userDetails);
         final String refreshToken = jwtUtil.generateRefreshToken(userDetails);
 
-        return ResponseEntity.ok(new AuthResponse(jwt, refreshToken));
+        PocUser pocUser = userRepository.findByUsername(request.getUsername());
+        String role = pocUser.getRoles().stream().findFirst().map(PocRole::getName).orElse("ROLE_UNKNOWN");
+
+        return ResponseEntity.ok(new AuthResponse(jwt, refreshToken, role));
     }
     @PostMapping("/refresh")
     public ResponseEntity<?> refreshToken(@RequestBody Map<String, String> request) {
         String refreshToken = request.get("refreshToken");
         if (refreshToken == null) return ResponseEntity.badRequest().body("Refresh token missing");
-
+try{
         String username = jwtUtil.extractUsernameFromRefresh(refreshToken);
-        UserDetails userDetails = userService.loadUserByUsername(username);
+        PocUser pocUser = userRepository.findByUsername(username);
+        if(pocUser == null){
+            return  ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid User");
 
-        String newAccessToken = jwtUtil.generateToken(userDetails);
-        return ResponseEntity.ok(new AuthResponse(newAccessToken, refreshToken));
+        }
+       final UserDetails userDetails = userService.loadUserByUsername(username);
+       final String newAccessToken = jwtUtil.generateToken(userDetails);
+       String role = pocUser.getRoles().stream().findFirst().map(PocRole::getName).orElse("ROLE_UNKNOWN");
+
+        return ResponseEntity.ok(new AuthResponse(newAccessToken, refreshToken, role));
+    }
+catch (Exception e){
+    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid Refresh Token");
+}
     }
 }
