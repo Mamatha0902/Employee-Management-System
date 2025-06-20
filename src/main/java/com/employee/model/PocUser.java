@@ -21,6 +21,14 @@ public class PocUser {
     @ManyToMany(fetch = FetchType.EAGER)
     private Set<PocRole> roles = new HashSet<>();
 
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
     public String getUsername() {
         return username;
     }

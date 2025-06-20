@@ -1,5 +1,6 @@
 package com.employee.controller;
 
+import com.employee.dto.EmployeeDto;
 import com.employee.model.Employee;
 import com.employee.exceptionhandling.ApiResponse;
 import com.employee.service.EmployeeService;
@@ -20,23 +21,29 @@ public class EmployeeController {
     @Autowired
     private EmployeeService employeeService;
 
+//    @PostMapping("/register")
+//    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+//    public ResponseEntity<ApiResponse<Employee>> registerEmployee(@RequestBody Employee employee) {
+//        Employee createdEmployee = employeeService.registerEmployee(employee);
+//        return ResponseEntity.ok(ApiResponse.success(createdEmployee));
+//    }
     @PostMapping("/register")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<Employee>> registerEmployee(@RequestBody Employee employee) {
-        Employee createdEmployee = employeeService.registerEmployee(employee);
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<ApiResponse<EmployeeDto>> registerEmployeeORUser(@RequestBody EmployeeDto employeeDto) {
+        EmployeeDto createdEmployee = employeeService.registerUser(employeeDto);
         return ResponseEntity.ok(ApiResponse.success(createdEmployee));
     }
 
     @GetMapping("/getAll")
-     @PreAuthorize("hasRole('ADMIN')")
+     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<ApiResponse<List<Employee>>> getAll() {
         ApiResponse<List<Employee>> response = employeeService.getAll();
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @GetMapping("/get/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
-    public ResponseEntity<ApiResponse<Employee>> getById(@PathVariable Long id) {
+    @GetMapping("/getById")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER')")
+    public ResponseEntity<ApiResponse<Employee>> getById(@RequestParam Long id) {
         Optional<Employee> employee = employeeService.getById(id);
 
         if (employee.isPresent()) {
@@ -49,7 +56,8 @@ public class EmployeeController {
     }
 
     @PutMapping("/update/{id}")
-  @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+//  @PreAuthorize("('ADMIN')")
     public ResponseEntity<ApiResponse<Employee>> updateEmployee(
             @PathVariable Long id,
             @RequestBody Employee updatedEmployee) {
@@ -71,7 +79,7 @@ public class EmployeeController {
     }
 
         @DeleteMapping("/delete/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
         public ResponseEntity<ApiResponse<String>> deleteEmployee (@PathVariable Long id){
             Optional<Employee> employee = employeeService.getById(id);
 

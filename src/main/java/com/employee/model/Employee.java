@@ -13,6 +13,8 @@ public class Employee {
     private String email;
 
     private String mobileNumber;
+    @Column(name = "fk_user_id") // This will store the foreign key, but not create a relation
+    private Long fkUserId;
 
     public Employee() {
     }
@@ -56,5 +58,11 @@ public class Employee {
         this.mobileNumber = mobileNumber;
     }
 
+    public Long getFkUserId() {
+        return fkUserId;
+    }
 
+    public void setFkUserId(Long fkUserId) {
+        this.fkUserId = fkUserId;
+    }
 }
