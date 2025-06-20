@@ -49,8 +49,7 @@ public class EmployeeService {
         user.setUsername(employeeDto.getUsername());
         user.setPassword(passwordEncoder.encode(employeeDto.getPassword()));
         user.setRoles(Set.of(userRole));
-
-        userRepository.save(user);
+        PocUser savedUser = userRepository.save(user);
 
         Optional<Employee> existingByEmail = employeeRepository.findByEmail(employeeDto.getEmail());
         if (existingByEmail.isPresent()) {
@@ -73,6 +72,7 @@ public class EmployeeService {
         employeeDto.setId(employee.getId());
         employeeDto.setFkUserId(user.getId());
         employeeDto.setPassword("****");
+        employeeDto.setRoles(savedUser.getRoles());
         return employeeDto;
     }
 

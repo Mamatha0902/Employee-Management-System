@@ -28,7 +28,6 @@ public class EmployeeController {
 //        return ResponseEntity.ok(ApiResponse.success(createdEmployee));
 //    }
     @PostMapping("/register")
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<ApiResponse<EmployeeDto>> registerEmployeeORUser(@RequestBody EmployeeDto employeeDto) {
         EmployeeDto createdEmployee = employeeService.registerUser(employeeDto);
         return ResponseEntity.ok(ApiResponse.success(createdEmployee));

@@ -41,9 +41,8 @@ public class SecurityConfig{
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/emp/register", "/auth/**").permitAll()
 //                        .requestMatchers( "/emp/**").hasAuthority("ROLE_ADMIN")
-                                .requestMatchers(HttpMethod.POST, "/emp/register").hasAuthority("ROLE_ADMIN")
                                 .requestMatchers(HttpMethod.GET,"/emp/getById").hasAnyAuthority("ROLE_ADMIN","ROLE_USER")
                                 .requestMatchers(HttpMethod.PUT,"/emp/**").hasAuthority("ROLE_ADMIN")
                                 .requestMatchers(HttpMethod.GET,"/emp/**").hasAuthority("ROLE_ADMIN")
@@ -76,11 +75,10 @@ public class SecurityConfig{
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.addAllowedOriginPattern("*"); // ✅ Allow all origins
-        config.addAllowedMethod("*");         // ✅ Allow all HTTP methods
-        config.addAllowedHeader("*");         // ✅ Allow all headers
-        config.setAllowCredentials(true);     // ✅ If using cookies or Authorization
-
+        config.addAllowedOriginPattern("*");
+        config.addAllowedMethod("*");
+        config.addAllowedHeader("*");
+        config.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return source;
