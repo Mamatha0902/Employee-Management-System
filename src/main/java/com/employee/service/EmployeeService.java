@@ -13,10 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -46,18 +43,12 @@ public class EmployeeService {
         return employeeRepository.save(employee);
     }
     public EmployeeDto registerUser(EmployeeDto employeeDto) {
-        Set<String> roleNames = employeeDto.getRoles()
-                .stream()
-                .map(PocRole::getName) // extract the role name
-                .collect(Collectors.toSet());
-        List<PocRole> roles = roleRepository.findByNameIn(roleNames);
-        if (roles.isEmpty()) {
-            throw new RuntimeException("Roles not found for names: " + roleNames);
-        }
+        PocRole userRole = roleRepository.findByName("ROLE_USER")
+                .orElseThrow(() -> new RuntimeException("Default role not found"));
         PocUser user = new PocUser();
         user.setUsername(employeeDto.getUsername());
         user.setPassword(passwordEncoder.encode(employeeDto.getPassword()));
-        user.setRoles(new HashSet<>(roles));
+        user.setRoles(Set.of(userRole));
 
         userRepository.save(user);
 

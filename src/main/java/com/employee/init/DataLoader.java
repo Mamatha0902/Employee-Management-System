@@ -26,7 +26,7 @@ public class DataLoader implements CommandLineRunner {
         if (roleRepo.findByName("ROLE_ADMIN") == null) {
             roleRepo.save(new PocRole(null, "ROLE_ADMIN"));
         }
-        PocRole userRole = roleRepo.findByName("ROLE_USER");
+        PocRole userRole = roleRepo.findByName("ROLE_USER").get();
         if (userRole == null) {
             userRole = new PocRole();
             userRole.setName("ROLE_USER");
@@ -36,7 +36,7 @@ public class DataLoader implements CommandLineRunner {
 
 
         if (userRepo.findByUsername("admin") == null) {
-            PocRole adminPocRole = roleRepo.findByName("ROLE_ADMIN");
+            PocRole adminPocRole = roleRepo.findByName("ROLE_ADMIN").get();
             PocUser admin = new PocUser();
             admin.setUsername("admin");
             admin.setPassword(passwordEncoder.encode("admin123"));
