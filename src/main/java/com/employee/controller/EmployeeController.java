@@ -4,6 +4,10 @@ import com.employee.dto.EmployeeDto;
 import com.employee.model.Employee;
 import com.employee.exceptionhandling.ApiResponse;
 import com.employee.service.EmployeeService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,19 +32,38 @@ public class EmployeeController {
 //        Employee createdEmployee = employeeService.registerEmployee(employee);
 //        return ResponseEntity.ok(ApiResponse.success(createdEmployee));
 //    }
+  @Operation(summary = "registerUser", description = "saves the users")
+  @ApiResponses(value = {
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "created"),
+          @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = " Request understood but authorization denied."),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Not Found ", content = @Content(schema = @Schema(implementation = IllegalStateException.class))),
+        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Internal Server Error")
+  })
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<EmployeeDto>> registerEmployeeORUser(@RequestBody EmployeeDto employeeDto) {
         EmployeeDto createdEmployee = employeeService.registerUser(employeeDto);
         return ResponseEntity.ok(ApiResponse.success(createdEmployee));
     }
-
+    @Operation(summary = "getAll", description = "get all the users")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "fetching the user"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = " Request understood but authorization denied."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Not Found ", content = @Content(schema = @Schema(implementation = IllegalStateException.class))),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Internal Server Error")
+    })
     @GetMapping("/getAll")
      @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<ApiResponse<List<Employee>>> getAll() {
         ApiResponse<List<Employee>> response = employeeService.getAll();
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
-
+    @Operation(summary = "getByid", description = "get by the user")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "get by id the user"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = " Request understood but authorization denied."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Not Found ", content = @Content(schema = @Schema(implementation = IllegalStateException.class))),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Internal Server Error")
+    })
     @GetMapping("/getById")
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER')")
     public ResponseEntity<ApiResponse<Employee>> getById(@RequestParam Long id, Authentication authentication) {
@@ -66,6 +89,13 @@ public class EmployeeController {
                     .body(ApiResponse.error("Employee not found with ID: " + id, "404"));
         }
     }
+    @Operation(summary = "updateUser", description = "update the users")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "update the user"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = " Request understood but authorization denied."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Not Found ", content = @Content(schema = @Schema(implementation = IllegalStateException.class))),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Internal Server Error")
+    })
 
     @PutMapping("/update")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
@@ -89,6 +119,13 @@ public class EmployeeController {
                     .body(ApiResponse.error("Employee not found with ID: " + id, "404"));
         }
     }
+    @Operation(summary = "deleteUser", description = "delete the users")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "delete user"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = " Request understood but authorization denied."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Not Found ", content = @Content(schema = @Schema(implementation = IllegalStateException.class))),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Internal Server Error")
+    })
 
         @DeleteMapping("/delete")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
