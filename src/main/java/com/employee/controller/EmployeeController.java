@@ -98,15 +98,25 @@ public class EmployeeController {
     })
 
     @PutMapping("/update")
-    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER')")
 //  @PreAuthorize("('ADMIN')")
     public ResponseEntity<ApiResponse<Employee>> updateEmployee(
             @RequestParam Long id,
-            @RequestBody Employee updatedEmployee) {
+            @RequestBody Employee updatedEmployee,  Authentication authentication) {
 
         Optional<Employee> existingEmployee = employeeService.getById(id);
-
-        if (existingEmployee.isPresent()) {
+        if (existingEmployee.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ApiResponse.error("Employee not found with ID: " + id, "404"));
+        }
+        String username = authentication.getName();
+        Optional<Employee> loggedInEmployee = employeeService.getEmployeeByUserName(username);
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        if (!isAdmin && loggedInEmployee.isPresent() && !loggedInEmployee.get().getId().equals(id)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(ApiResponse.error("Access denied: cannot update other user's data", "403"));
+        }
             Employee employee = existingEmployee.get();
             employee.setName(updatedEmployee.getName());
             employee.setEmail(updatedEmployee.getEmail());
@@ -114,10 +124,7 @@ public class EmployeeController {
 
             Employee saved = employeeService.saveEmployee(employee);
             return ResponseEntity.ok(ApiResponse.success(saved));
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(ApiResponse.error("Employee not found with ID: " + id, "404"));
-        }
+
     }
     @Operation(summary = "deleteUser", description = "delete the users")
     @ApiResponses(value = {
