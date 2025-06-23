@@ -42,6 +42,7 @@ public class EmployeeService {
 
         return employeeRepository.save(employee);
     }
+
     public EmployeeDto registerUser(EmployeeDto employeeDto) {
         PocRole userRole = roleRepository.findByName("ROLE_USER")
                 .orElseThrow(() -> new RuntimeException("Default role not found"));
@@ -67,7 +68,7 @@ public class EmployeeService {
         employee.setMobileNumber(employeeDto.getMobileNumber());
         employee.setFkUserId(user.getId()); // link the user
 
-         employeeRepository.save(employee);
+        employeeRepository.save(employee);
 
         employeeDto.setId(employee.getId());
         employeeDto.setFkUserId(user.getId());
@@ -90,5 +91,16 @@ public class EmployeeService {
 
     public void deleteById(Long id) {
         employeeRepository.deleteById(id);
+    }
+
+    public Optional<Employee> getEmployeeByUserName(String username) {
+        Optional<PocUser> userOpt = Optional.ofNullable(userRepository.findByUsername(username));
+
+        if (userOpt.isPresent()) {
+            Long userId = userOpt.get().getId();
+            return employeeRepository.findByFkUserId(userId);
+        }
+
+        return Optional.empty();
     }
 }

@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -42,23 +43,35 @@ public class EmployeeController {
 
     @GetMapping("/getById")
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_USER')")
-    public ResponseEntity<ApiResponse<Employee>> getById(@RequestParam Long id) {
-        Optional<Employee> employee = employeeService.getById(id);
+    public ResponseEntity<ApiResponse<Employee>> getById(@RequestParam Long id, Authentication authentication) {
+        String currentUsername = authentication.getName();
 
-        if (employee.isPresent()) {
-            ApiResponse<Employee> response = ApiResponse.success(employee.get());
-            return ResponseEntity.ok(response);
+        Optional<Employee> currentUserEmployee = employeeService.getEmployeeByUserName(currentUsername);
+        if (currentUserEmployee.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ApiResponse.error("User not linked to any employee record", "401"));
+        }
+
+        boolean isAdmin= authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        if(!isAdmin && !currentUserEmployee.get().getId().equals(id)){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(ApiResponse.error("Access denied: cannot view other user's data", "403"));
+        }
+        Optional<Employee> requestedEmployee = employeeService.getById(id);
+        if (requestedEmployee.isPresent()) {
+            return ResponseEntity.ok(ApiResponse.success(requestedEmployee.get()));
         } else {
-            ApiResponse<Employee> response = ApiResponse.error("Employee not found with ID: " + id, "404");
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ApiResponse.error("Employee not found with ID: " + id, "404"));
         }
     }
 
-    @PutMapping("/update/{id}")
+    @PutMapping("/update")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
 //  @PreAuthorize("('ADMIN')")
     public ResponseEntity<ApiResponse<Employee>> updateEmployee(
-            @PathVariable Long id,
+            @RequestParam Long id,
             @RequestBody Employee updatedEmployee) {
 
         Optional<Employee> existingEmployee = employeeService.getById(id);
@@ -77,9 +90,9 @@ public class EmployeeController {
         }
     }
 
-        @DeleteMapping("/delete/{id}")
+        @DeleteMapping("/delete")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-        public ResponseEntity<ApiResponse<String>> deleteEmployee (@PathVariable Long id){
+        public ResponseEntity<ApiResponse<String>> deleteEmployee (@RequestParam Long id){
             Optional<Employee> employee = employeeService.getById(id);
 
             if (employee.isPresent()) {

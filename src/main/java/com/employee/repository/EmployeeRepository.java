@@ -1,6 +1,7 @@
 package com.employee.repository;
 
 import com.employee.model.Employee;
+import com.employee.model.PocUser;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -14,4 +15,5 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long>
 
     Optional<Employee> findByMobileNumber(String mobileNumber);
 
+    Optional<Employee> findByFkUserId(Long fkUserId);
 }
