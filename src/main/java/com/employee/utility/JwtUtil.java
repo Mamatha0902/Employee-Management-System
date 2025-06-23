@@ -32,7 +32,7 @@ public class JwtUtil {
     }
 
     public String generateToken(UserDetails userDetails) {
-        return createToken(userDetails.getUsername(), 10 * 60 * 1000, SECRET_KEY); // 10 minutes
+        return createToken(userDetails.getUsername(), 30 * 60 * 1000, SECRET_KEY); // 10 minutes
     }
 
     public String generateRefreshToken(UserDetails userDetails) {
