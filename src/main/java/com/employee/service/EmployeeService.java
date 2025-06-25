@@ -2,6 +2,8 @@ package com.employee.service;
 
 
 import com.employee.dto.EmployeeDto;
+import com.employee.dto.TaskDto;
+import com.employee.feignClient.TaskSeviceClient;
 import com.employee.model.Employee;
 import com.employee.model.PocRole;
 import com.employee.model.PocUser;
@@ -28,6 +30,8 @@ public class EmployeeService {
     private PasswordEncoder passwordEncoder;
     @Autowired
     private RoleRepository roleRepository;
+    @Autowired
+    private TaskSeviceClient taskSeviceClient;
 
     public Employee registerEmployee(Employee employee) {
         Optional<Employee> existingByEmail = employeeRepository.findByEmail(employee.getEmail());
@@ -109,5 +113,7 @@ public class EmployeeService {
 
         return Optional.empty();
     }
-
+    public List<TaskDto> getTasksForEmployee(Long employeeId) {
+        return taskSeviceClient.getTasksByEmployeeId(employeeId);
+    }
 }

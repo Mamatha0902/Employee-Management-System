@@ -1,6 +1,8 @@
 package com.employee.controller;
 
 import com.employee.dto.EmployeeDto;
+import com.employee.dto.TaskDto;
+import com.employee.feignClient.TaskSeviceClient;
 import com.employee.model.Employee;
 import com.employee.exceptionhandling.ApiResponse;
 import com.employee.service.EmployeeService;
@@ -26,6 +28,9 @@ public class EmployeeController {
 
     @Autowired
     private EmployeeService employeeService;
+
+    @Autowired
+    private TaskSeviceClient taskSeviceClient;
 
 //    @PostMapping("/register")
 //    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
@@ -140,5 +145,9 @@ public class EmployeeController {
                         .body(ApiResponse.error("Employee not found with ID: " + id, "404"));
             }
         }
+    @GetMapping("/employee")  // Final path: /emp/employee
+    public ResponseEntity<List<TaskDto>> getTasksForEmployee(@RequestParam("id") Long employeeId) {
+        return ResponseEntity.ok(taskSeviceClient.getTasksByEmployeeId(employeeId));
+    }
     }
 
