@@ -43,38 +43,44 @@ public class EmployeeService {
         return employeeRepository.save(employee);
     }
 
-    public EmployeeDto registerUser(EmployeeDto employeeDto) {
-        PocRole userRole = roleRepository.findByName("ROLE_USER")
-                .orElseThrow(() -> new RuntimeException("Default role not found"));
-        PocUser user = new PocUser();
-        user.setUsername(employeeDto.getUsername());
-        user.setPassword(passwordEncoder.encode(employeeDto.getPassword()));
-        user.setRoles(Set.of(userRole));
-        PocUser savedUser = userRepository.save(user);
+    public EmployeeDto registerUser(EmployeeDto dto) {
+        if (userRepository.existsByUsername(dto.getUsername())) {
+            throw new RuntimeException("Username already exists");
+        }
 
-        Optional<Employee> existingByEmail = employeeRepository.findByEmail(employeeDto.getEmail());
-        if (existingByEmail.isPresent()) {
+        if (employeeRepository.findByEmail(dto.getEmail()).isPresent()) {
             throw new RuntimeException("Email already exists");
         }
-        Optional<Employee> existingByMobile = employeeRepository.findByMobileNumber(employeeDto.getMobileNumber());
-        if (existingByMobile.isPresent()) {
+
+        if (employeeRepository.findByMobileNumber(dto.getMobileNumber()).isPresent()) {
             throw new RuntimeException("Mobile number already exists");
         }
 
-        // Then create and save Employee with relation
+        // Create and encode user
+        PocUser user = new PocUser();
+        user.setUsername(dto.getUsername());
+        user.setPassword(passwordEncoder.encode(dto.getPassword())); // ✅ ENCODE the password
+        PocRole defaultRole = roleRepository.findByName("ROLE_USER").orElseThrow(()-> new RuntimeException(" default role not found"));
+
+        user.setRoles(Set.of(defaultRole));
+
+
+
+        PocUser savedUser = userRepository.save(user);
+
+        // Create employee
         Employee employee = new Employee();
-        employee.setName(employeeDto.getName());
-        employee.setEmail(employeeDto.getEmail());
-        employee.setMobileNumber(employeeDto.getMobileNumber());
-        employee.setFkUserId(user.getId()); // link the user
+        employee.setName(dto.getName());
+        employee.setEmail(dto.getEmail());
+        employee.setMobileNumber(dto.getMobileNumber());
+        employee.setFkUserId(savedUser.getId());
 
-        employeeRepository.save(employee);
+        Employee savedEmployee = employeeRepository.save(employee);
 
-        employeeDto.setId(employee.getId());
-        employeeDto.setFkUserId(user.getId());
-        employeeDto.setPassword("****");
-        employeeDto.setRoles(savedUser.getRoles());
-        return employeeDto;
+        dto.setId(savedEmployee.getId());
+        dto.setFkUserId(savedUser.getId());
+        dto.setRoles(savedUser.getRoles());
+        return dto;
     }
 
     public ApiResponse<List<Employee>> getAll() {
@@ -94,7 +100,7 @@ public class EmployeeService {
     }
 
     public Optional<Employee> getEmployeeByUserName(String username) {
-        Optional<PocUser> userOpt = Optional.ofNullable(userRepository.findByUsername(username));
+        Optional<PocUser> userOpt = userRepository.findByUsername(username);
 
         if (userOpt.isPresent()) {
             Long userId = userOpt.get().getId();
@@ -103,4 +109,5 @@ public class EmployeeService {
 
         return Optional.empty();
     }
+
 }

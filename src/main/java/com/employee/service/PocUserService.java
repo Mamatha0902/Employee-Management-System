@@ -18,10 +18,16 @@ public class PocUserService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        PocUser user = userRepository.findByUsername(username);
-        return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(),
+        PocUser user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
+
+        return new org.springframework.security.core.userdetails.User(
+                user.getUsername(),
+                user.getPassword(),
                 user.getRoles().stream()
                         .map(role -> new SimpleGrantedAuthority(role.getName()))
-                        .collect(Collectors.toList()));
+                        .collect(Collectors.toList())
+        );
     }
+
 }

@@ -33,37 +33,53 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody AuthRequest request) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
+        try {
+            // ✅ This will fail if password in DB is not encoded
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
+            );
 
-        final UserDetails userDetails = userService.loadUserByUsername(request.getUsername());
-        final String jwt = jwtUtil.generateToken(userDetails);
-        final String refreshToken = jwtUtil.generateRefreshToken(userDetails);
+            final UserDetails userDetails = userService.loadUserByUsername(request.getUsername());
+            final String jwt = jwtUtil.generateToken(userDetails);
+            final String refreshToken = jwtUtil.generateRefreshToken(userDetails);
 
-        PocUser pocUser = userRepository.findByUsername(request.getUsername());
-        String role = pocUser.getRoles().stream().findFirst().map(PocRole::getName).orElse("ROLE_UNKNOWN");
+            PocUser pocUser = userRepository.findByUsername(request.getUsername())
+                    .orElseThrow(() -> new RuntimeException("User not found"));
 
-        return ResponseEntity.ok(new AuthResponse(jwt, refreshToken, role));
+            String role = pocUser.getRoles().stream()
+                    .findFirst()
+                    .map(PocRole::getName)
+                    .orElse("ROLE_UNKNOWN");
+
+            return ResponseEntity.ok(new AuthResponse(jwt, refreshToken, role));
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
+        }
     }
+
     @PostMapping("/refresh")
     public ResponseEntity<?> refreshToken(@RequestBody Map<String, String> request) {
         String refreshToken = request.get("refreshToken");
-        if (refreshToken == null) return ResponseEntity.badRequest().body("Refresh token missing");
-try{
-        String username = jwtUtil.extractUsernameFromRefresh(refreshToken);
-        PocUser pocUser = userRepository.findByUsername(username);
-        if(pocUser == null){
-            return  ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid User");
-
+        if (refreshToken == null) {
+            return ResponseEntity.badRequest().body("Refresh token missing");
         }
-       final UserDetails userDetails = userService.loadUserByUsername(username);
-       final String newAccessToken = jwtUtil.generateToken(userDetails);
-       String role = pocUser.getRoles().stream().findFirst().map(PocRole::getName).orElse("ROLE_UNKNOWN");
 
-        return ResponseEntity.ok(new AuthResponse(newAccessToken, refreshToken, role));
-    }
-catch (Exception e){
-    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid Refresh Token");
-}
+        try {
+            String username = jwtUtil.extractUsernameFromRefresh(refreshToken);
+            PocUser pocUser = userRepository.findByUsername(username)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+
+            final UserDetails userDetails = userService.loadUserByUsername(username);
+            final String newAccessToken = jwtUtil.generateToken(userDetails);
+
+            String role = pocUser.getRoles().stream()
+                    .findFirst()
+                    .map(PocRole::getName)
+                    .orElse("ROLE_UNKNOWN");
+
+            return ResponseEntity.ok(new AuthResponse(newAccessToken, refreshToken, role));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid refresh token");
+        }
     }
 }
