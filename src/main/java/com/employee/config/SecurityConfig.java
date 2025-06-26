@@ -44,6 +44,7 @@ public class SecurityConfig{
                         .requestMatchers("/emp/register", "/auth/**").permitAll()
 //                        .requestMatchers( "/emp/**").hasAuthority("ROLE_ADMIN")
                                 .requestMatchers("/emp/tasks/**" ).permitAll()
+                                .requestMatchers("/manager/**").hasAuthority("ROLE_MANAGER")
                                 .requestMatchers("/swagger-ui.html/**", "/v3/api-docs/**", "/swagger-ui/**").permitAll()
 //                                .requestMatchers(HttpMethod.POST, "/emp/register").hasAuthority("ROLE_ADMIN")
                                 .requestMatchers(HttpMethod.GET,"/emp/getById").hasAnyAuthority("ROLE_ADMIN","ROLE_USER")

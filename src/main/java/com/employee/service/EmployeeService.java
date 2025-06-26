@@ -63,12 +63,13 @@ public class EmployeeService {
         // Create and encode user
         PocUser user = new PocUser();
         user.setUsername(dto.getUsername());
-        user.setPassword(passwordEncoder.encode(dto.getPassword())); // ✅ ENCODE the password
-        PocRole defaultRole = roleRepository.findByName("ROLE_USER").orElseThrow(()-> new RuntimeException(" default role not found"));
+        user.setPassword(passwordEncoder.encode(dto.getPassword()));
+        Set<PocRole> roles = dto.getRoles().stream()
+                .map(role -> roleRepository.findByName(role.getName())
+                        .orElseThrow(() -> new RuntimeException("Role not found: " + role.getName())))
+                .collect(Collectors.toSet());
 
-        user.setRoles(Set.of(defaultRole));
-
-
+        user.setRoles(roles);
 
         PocUser savedUser = userRepository.save(user);
 

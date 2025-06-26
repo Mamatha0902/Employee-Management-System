@@ -26,13 +26,11 @@ public class DataLoader implements CommandLineRunner {
         if (roleRepo.findByName("ROLE_ADMIN") == null) {
             roleRepo.save(new PocRole(null, "ROLE_ADMIN"));
         }
-        PocRole userRole = roleRepo.findByName("ROLE_USER").get();
-        if (userRole == null) {
-            userRole = new PocRole();
-            userRole.setName("ROLE_USER");
-            userRole = roleRepo.save(userRole); // save and assign back
-            System.out.println(" ROLE_USER saved"+ userRole);
-        }
+        PocRole userRole = roleRepo.findByName("ROLE_USER")
+                .orElseGet(() -> roleRepo.save(new PocRole(null, "ROLE_USER")));
+
+        PocRole managerRole = roleRepo.findByName("ROLE_MANAGER")
+                .orElseGet(() -> roleRepo.save(new PocRole(null, "ROLE_MANAGER")));
 
 
         if (userRepo.findByUsername("admin") == null) {
