@@ -76,17 +76,17 @@ public class SecurityConfig{
         return new BCryptPasswordEncoder();
     }
 
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration config = new CorsConfiguration();
-        config.addAllowedOriginPattern("*"); // ✅ Allow all origins
-        config.addAllowedMethod("*");         // ✅ Allow all HTTP methods
-        config.addAllowedHeader("*");         // ✅ Allow all headers
-        config.setAllowCredentials(true);     // ✅ If using cookies or Authorization
-
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config);
-        return source;
-    }
+//    @Bean
+//    public CorsConfigurationSource corsConfigurationSource() {
+//        CorsConfiguration config = new CorsConfiguration();
+//        config.addAllowedOriginPattern("*"); // ✅ Allow all origins
+//        config.addAllowedMethod("*");         // ✅ Allow all HTTP methods
+//        config.addAllowedHeader("*");         // ✅ Allow all headers
+//        config.setAllowCredentials(true);     // ✅ If using cookies or Authorization
+//
+//        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+//        source.registerCorsConfiguration("/**", config);
+//        return source;
+//    }
 
 }
