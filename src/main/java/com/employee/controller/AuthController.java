@@ -1,9 +1,7 @@
 package com.employee.controller;
 
-import com.employee.model.AuthRequest;
-import com.employee.model.AuthResponse;
-import com.employee.model.PocRole;
-import com.employee.model.PocUser;
+import com.employee.model.*;
+import com.employee.repository.EmployeeRepository;
 import com.employee.repository.UserRepository;
 import com.employee.service.PocUserService;
 import com.employee.utility.JwtUtil;
@@ -31,10 +29,13 @@ public class AuthController {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private EmployeeRepository employeeRepository;
+
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody AuthRequest request) {
         try {
-            // ✅ This will fail if password in DB is not encoded
+            // This will fail if password in DB is not encoded
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
             );
@@ -51,7 +52,12 @@ public class AuthController {
                     .map(PocRole::getName)
                     .orElse("ROLE_UNKNOWN");
 
-            return ResponseEntity.ok(new AuthResponse(jwt, refreshToken, role));
+            //Fetching employee
+            Long employeeId = employeeRepository.findByFkUserId(pocUser.getId())
+                    .map(Employee::getId)
+                    .orElse(null);
+
+            return ResponseEntity.ok(new AuthResponse(jwt, refreshToken, role, employeeId));
         } catch (Exception ex) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
         }
@@ -77,7 +83,7 @@ public class AuthController {
                     .map(PocRole::getName)
                     .orElse("ROLE_UNKNOWN");
 
-            return ResponseEntity.ok(new AuthResponse(newAccessToken, refreshToken, role));
+            return ResponseEntity.ok(new AuthResponse(newAccessToken, refreshToken, role, pocUser.getId()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid refresh token");
         }
