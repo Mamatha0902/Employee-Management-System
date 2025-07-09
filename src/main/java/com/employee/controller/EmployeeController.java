@@ -5,6 +5,7 @@ import com.employee.dto.TaskDto;
 import com.employee.feignClient.TaskSeviceClient;
 import com.employee.model.Employee;
 import com.employee.exceptionhandling.ApiResponse;
+import com.employee.model.Task;
 import com.employee.service.EmployeeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -32,24 +33,25 @@ public class EmployeeController {
     @Autowired
     private TaskSeviceClient taskSeviceClient;
 
-//    @PostMapping("/register")
+    //    @PostMapping("/register")
 //    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
 //    public ResponseEntity<ApiResponse<Employee>> registerEmployee(@RequestBody Employee employee) {
 //        Employee createdEmployee = employeeService.registerEmployee(employee);
 //        return ResponseEntity.ok(ApiResponse.success(createdEmployee));
 //    }
-  @Operation(summary = "registerUser", description = "saves the users")
-  @ApiResponses(value = {
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "created"),
-          @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = " Request understood but authorization denied."),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Not Found ", content = @Content(schema = @Schema(implementation = IllegalStateException.class))),
-        @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Internal Server Error")
-  })
+    @Operation(summary = "registerUser", description = "saves the users")
+    @ApiResponses(value = {
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "201", description = "created"),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "403", description = " Request understood but authorization denied."),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "404", description = "Not Found ", content = @Content(schema = @Schema(implementation = IllegalStateException.class))),
+            @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Internal Server Error")
+    })
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<EmployeeDto>> registerEmployeeORUser(@Valid @RequestBody EmployeeDto employeeDto) {
         EmployeeDto createdEmployee = employeeService.registerUser(employeeDto);
         return ResponseEntity.ok(ApiResponse.success(createdEmployee));
     }
+
     @Operation(summary = "getAll", description = "get all the users")
     @ApiResponses(value = {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "fetching the user"),
@@ -58,11 +60,12 @@ public class EmployeeController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Internal Server Error")
     })
     @GetMapping("/getAll")
-     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<ApiResponse<List<Employee>>> getAll() {
         ApiResponse<List<Employee>> response = employeeService.getAll();
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+
     @Operation(summary = "getByid", description = "get by the user")
     @ApiResponses(value = {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "get by id the user"),
@@ -81,9 +84,9 @@ public class EmployeeController {
                     .body(ApiResponse.error("User not linked to any employee record", "401"));
         }
 
-        boolean isAdmin= authentication.getAuthorities().stream()
+        boolean isAdmin = authentication.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
-        if(!isAdmin && !currentUserEmployee.get().getId().equals(id)){
+        if (!isAdmin && !currentUserEmployee.get().getId().equals(id)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body(ApiResponse.error("Access denied: cannot view other user's data", "403"));
         }
@@ -95,6 +98,7 @@ public class EmployeeController {
                     .body(ApiResponse.error("Employee not found with ID: " + id, "404"));
         }
     }
+
     @Operation(summary = "updateUser", description = "update the users")
     @ApiResponses(value = {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "update the user"),
@@ -124,6 +128,7 @@ public class EmployeeController {
                     .body(ApiResponse.error("Employee not found with ID: " + id, "404"));
         }
     }
+
     @Operation(summary = "deleteUser", description = "delete the users")
     @ApiResponses(value = {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "200", description = "delete user"),
@@ -132,22 +137,19 @@ public class EmployeeController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Internal Server Error")
     })
 
-        @DeleteMapping("/delete")
+    @DeleteMapping("/delete")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
-        public ResponseEntity<ApiResponse<String>> deleteEmployee (@RequestParam Long id){
-            Optional<Employee> employee = employeeService.getById(id);
+    public ResponseEntity<ApiResponse<String>> deleteEmployee(@RequestParam Long id) {
+        Optional<Employee> employee = employeeService.getById(id);
 
-            if (employee.isPresent()) {
-                employeeService.deleteById(id);
-                return ResponseEntity.ok(ApiResponse.success("Employee deleted successfully"));
-            } else {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(ApiResponse.error("Employee not found with ID: " + id, "404"));
-            }
+        if (employee.isPresent()) {
+            employeeService.deleteById(id);
+            return ResponseEntity.ok(ApiResponse.success("Employee deleted successfully"));
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ApiResponse.error("Employee not found with ID: " + id, "404"));
         }
-    @GetMapping("/employee")  // Final path: /emp/employee
-    public ResponseEntity<List<TaskDto>> getTasksForEmployee(@RequestParam("id") Long employeeId) {
-        return ResponseEntity.ok(taskSeviceClient.getTasksByEmployeeId(employeeId));
-    }
     }
 
+
+}

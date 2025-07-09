@@ -28,4 +28,16 @@ public class ManagerController {
         return ResponseEntity.ok(taskSeviceClient.updateTaskByEmpId(id, task));
     }
 
+    @GetMapping("/employee")
+    @PreAuthorize("hasAuthority('ROLE_MANAGER')")// Final path: /emp/employee
+    public ResponseEntity<List<TaskDto>> getTasksForEmployee(@RequestParam("id") Long employeeId) {
+        return ResponseEntity.ok(taskSeviceClient.getTasksByEmployeeId(employeeId));
+    }
+
+    @GetMapping("/taskGetAll")
+    @PreAuthorize("hasAuthority('ROLE_MANAGER')")
+    public ResponseEntity<List<Task>> getAllTasks() {
+        return ResponseEntity.ok(taskSeviceClient.getAllTasks());
+    }
+
 }

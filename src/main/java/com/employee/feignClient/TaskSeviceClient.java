@@ -18,4 +18,7 @@ public interface TaskSeviceClient {
 
     @PutMapping("/tasks/update")
     Task updateTaskByEmpId(@RequestParam Long id, @RequestBody Task dto);
+
+    @GetMapping("/tasks/all")
+    List<Task> getAllTasks();
 }
