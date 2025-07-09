@@ -2,7 +2,9 @@ package com.employee.controller;
 
 import com.employee.dto.TaskDto;
 import com.employee.feignClient.TaskSeviceClient;
+import com.employee.model.Employee;
 import com.employee.model.Task;
+import com.employee.repository.EmployeeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -15,6 +17,8 @@ public class ManagerController {
 
     @Autowired
     private TaskSeviceClient taskSeviceClient;
+    @Autowired
+    private EmployeeRepository employeeRepository;
 
     @PostMapping("/save")
     @PreAuthorize("hasAuthority('ROLE_MANAGER')")
@@ -38,6 +42,13 @@ public class ManagerController {
     @PreAuthorize("hasAuthority('ROLE_MANAGER')")
     public ResponseEntity<List<Task>> getAllTasks() {
         return ResponseEntity.ok(taskSeviceClient.getAllTasks());
+    }
+
+    @PostMapping("/taskassign")
+    @PreAuthorize("hasAuthority('ROLE_MANAGER')")
+    public ResponseEntity<String> assignTask(@RequestParam Long empId, @RequestParam Long taskId){
+        Employee employee = employeeRepository.findById(empId).orElseThrow(()-> new RuntimeException("Employee Id not found"));
+        return ResponseEntity.ok(taskSeviceClient.assignTasks(employee.getId(),taskId));
     }
 
 }
