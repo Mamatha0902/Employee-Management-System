@@ -60,7 +60,7 @@ public class EmployeeController {
             @io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "500", description = "Internal Server Error")
     })
     @GetMapping("/getAll")
-    @PreAuthorize("hasAuthority('ROLE_ADMIN', 'ROLE_MANAGER')")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN','ROLE_MANAGER')")
     public ResponseEntity<ApiResponse<List<Employee>>> getAll() {
         ApiResponse<List<Employee>> response = employeeService.getAll();
         return new ResponseEntity<>(response, HttpStatus.OK);
