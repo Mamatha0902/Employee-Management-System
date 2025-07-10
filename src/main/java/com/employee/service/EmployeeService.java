@@ -2,6 +2,7 @@ package com.employee.service;
 
 
 import com.employee.dto.EmployeeDto;
+import com.employee.dto.ListEmployeeDto;
 import com.employee.dto.TaskDto;
 import com.employee.feignClient.TaskSeviceClient;
 import com.employee.model.Employee;
@@ -116,5 +117,9 @@ public class EmployeeService {
     }
     public List<TaskDto> getTasksForEmployee(Long employeeId) {
         return taskSeviceClient.getTasksByEmployeeId(employeeId);
+    }
+
+    public ApiResponse<List<ListEmployeeDto>> listEmps() {
+        return  ApiResponse.success(employeeRepository.findByName());
     }
 }

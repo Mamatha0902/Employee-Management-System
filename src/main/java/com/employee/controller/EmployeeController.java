@@ -1,6 +1,7 @@
 package com.employee.controller;
 
 import com.employee.dto.EmployeeDto;
+import com.employee.dto.ListEmployeeDto;
 import com.employee.dto.TaskDto;
 import com.employee.feignClient.TaskSeviceClient;
 import com.employee.model.Employee;
@@ -149,6 +150,13 @@ public class EmployeeController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(ApiResponse.error("Employee not found with ID: " + id, "404"));
         }
+    }
+
+    @GetMapping("/listEmployees")
+    @PreAuthorize("hasAuthority('ROLE_MANAGER')")
+    public ResponseEntity<ApiResponse<List<ListEmployeeDto>>> getListAllEmployees(){
+        ApiResponse<List<ListEmployeeDto>> response = employeeService.listEmps();
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
 
