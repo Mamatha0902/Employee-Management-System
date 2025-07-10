@@ -51,4 +51,10 @@ public class ManagerController {
         return ResponseEntity.ok(taskSeviceClient.assignTasks(employee.getId(),taskId));
     }
 
+    @GetMapping("/taskGetById")
+    @PreAuthorize("hasAuthority('ROLE_MANAGER')")
+    public ResponseEntity<Task> getTaskByTaskId(@RequestParam Long taskId){
+        return ResponseEntity.ok(taskSeviceClient.getTaskByTaskId(taskId));
+    }
+
 }

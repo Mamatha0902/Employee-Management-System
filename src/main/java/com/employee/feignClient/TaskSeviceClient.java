@@ -24,4 +24,7 @@ public interface TaskSeviceClient {
 
     @PostMapping("/tasks/assign")
     String assignTasks(@RequestParam Long empId, @RequestParam Long taskId);
+
+    @GetMapping("/tasks/getById")
+    Task getTaskByTaskId(@RequestParam Long taskId);
 }
